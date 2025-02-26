@@ -37,6 +37,9 @@ fn find_libsodium_env() {
     } else {
         "static"
     };
+
+    println!("cargo:warning=mode: {mode}");
+
     let name = if cfg!(target_env = "msvc") {
         "libsodium"
     } else {
@@ -533,12 +536,19 @@ fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_DISABLE_PIE");
 
     let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
+
+    println!("cargo:warning=SODIUM_LIB_DIR set: {lib_dir_isset}");
+
     let use_pkg_isset = if cfg!(feature = "use-pkg-config") {
         true
     } else {
         env::var("SODIUM_USE_PKG_CONFIG").is_ok()
     };
     let shared_isset = env::var("SODIUM_SHARED").is_ok();
+
+    println!("cargo:warning=SODIUM_SHARED set: {shared_isset}");
+
+    println!("cargo:warning=use_pkg_isset: {use_pkg_isset}");
 
     if lib_dir_isset && use_pkg_isset {
         panic!("SODIUM_LIB_DIR is incompatible with SODIUM_USE_PKG_CONFIG. Set the only one env variable");
