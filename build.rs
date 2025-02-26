@@ -4,6 +4,7 @@ use std::{
 };
 
 fn main() {
+    println!("cargo:warning=running libsodium-sys-stable build script");
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
     println!("cargo:rerun-if-env-changed=SODIUM_SHARED");
     println!("cargo:rerun-if-env-changed=SODIUM_USE_PKG_CONFIG");
