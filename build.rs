@@ -4,15 +4,15 @@ use std::{
 };
 
 fn main() {
-    println!("cargo:warning=running libsodium-sys-stable build script");
+    println!("cargo::warning=running libsodium-sys-stable build script");
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
     println!("cargo:rerun-if-env-changed=SODIUM_SHARED");
     println!("cargo:rerun-if-env-changed=SODIUM_USE_PKG_CONFIG");
 
     if cfg!(target_env = "msvc") {
-        println!("cargo:warning=is msvc target");
+        println!("cargo::warning=is msvc target");
         println!(
-            "cargo:warning=VCPKGRS_DYNAMIC set: {}",
+            "cargo::warning=VCPKGRS_DYNAMIC set: {}",
             env::var("VCPKGRS_DYNAMIC").is_ok()
         );
         // vcpkg requires to set env VCPKGRS_DYNAMIC
@@ -28,7 +28,7 @@ fn main() {
 
     let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
 
-    println!("cargo:warning=SODIUM_LIB_DIR set: {lib_dir_isset}");
+    println!("cargo::warning=SODIUM_LIB_DIR set: {lib_dir_isset}");
 
     let use_pkg_isset = if cfg!(feature = "use-pkg-config") {
         true
@@ -37,8 +37,8 @@ fn main() {
     };
     let shared_isset = env::var("SODIUM_SHARED").is_ok();
 
-    println!("cargo:warning=SODIUM_SHARED set: {shared_isset}");
-    println!("cargo:warning=use_pkg_isset: {use_pkg_isset}");
+    println!("cargo::warning=SODIUM_SHARED set: {shared_isset}");
+    println!("cargo::warning=use_pkg_isset: {use_pkg_isset}");
 
     if lib_dir_isset && use_pkg_isset {
         panic!("SODIUM_LIB_DIR is incompatible with SODIUM_USE_PKG_CONFIG. Set the only one env variable");
@@ -48,14 +48,14 @@ fn main() {
         find_libsodium_env();
     } else if use_pkg_isset {
         if shared_isset {
-            println!("cargo:warning=SODIUM_SHARED has no effect with SODIUM_USE_PKG_CONFIG");
+            println!("cargo::warning=SODIUM_SHARED has no effect with SODIUM_USE_PKG_CONFIG");
         }
 
         find_libsodium_pkg();
     } else {
         if shared_isset {
             println!(
-                "cargo:warning=SODIUM_SHARED has no effect for building libsodium from source"
+                "cargo::warning=SODIUM_SHARED has no effect for building libsodium from source"
             );
         }
 
@@ -81,10 +81,10 @@ fn find_libsodium_env() {
         "sodium"
     };
 
-    println!("cargo:warning=mode: {mode}");
+    println!("cargo::warning=mode: {mode}");
 
     println!("cargo:rustc-link-lib={mode}={name}");
-    println!("cargo:warning=Using unknown libsodium version.");
+    println!("cargo::warning=Using unknown libsodium version.");
 }
 
 /* Must be called when no SODIUM_USE_PKG_CONFIG env var is set
@@ -94,7 +94,7 @@ This function will set `cargo` flags.
 fn find_libsodium_pkg() {
     match vcpkg::probe_package("libsodium") {
         Ok(lib) => {
-            println!("cargo:warning=Using unknown libsodium version");
+            println!("cargo::warning=Using unknown libsodium version");
             for lib_dir in &lib.link_paths {
                 println!("cargo:lib={}", lib_dir.to_str().unwrap());
             }
@@ -521,7 +521,7 @@ fn build_libsodium() {
         install_dir = fallback_path.join("installed");
         source_dir = fallback_path.join("source");
         println!(
-            "cargo:warning=The path to the usual build directory contains spaces and hence \
+            "cargo::warning=The path to the usual build directory contains spaces and hence \
              can't be used to build libsodium.  Falling back to use {}.  If running `cargo \
              clean`, ensure you also delete this fallback directory",
             fallback_path.to_str().unwrap()
