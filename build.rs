@@ -9,6 +9,11 @@ fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_USE_PKG_CONFIG");
 
     if cfg!(target_env = "msvc") {
+        println!("cargo:warning=is msvc target");
+        println!(
+            "cargo:warning=VCPKGRS_DYNAMIC set: {}",
+            env::var("VCPKGRS_DYNAMIC").is_ok()
+        );
         // vcpkg requires to set env VCPKGRS_DYNAMIC
         println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
     }
@@ -21,12 +26,18 @@ fn main() {
     }
 
     let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
+
+    println!("cargo:warning=SODIUM_LIB_DIR set: {lib_dir_isset}");
+
     let use_pkg_isset = if cfg!(feature = "use-pkg-config") {
         true
     } else {
         env::var("SODIUM_USE_PKG_CONFIG").is_ok()
     };
     let shared_isset = env::var("SODIUM_SHARED").is_ok();
+
+    println!("cargo:warning=SODIUM_SHARED set: {shared_isset}");
+    println!("cargo:warning=use_pkg_isset: {use_pkg_isset}");
 
     if lib_dir_isset && use_pkg_isset {
         panic!("SODIUM_LIB_DIR is incompatible with SODIUM_USE_PKG_CONFIG. Set the only one env variable");
@@ -68,6 +79,9 @@ fn find_libsodium_env() {
     } else {
         "sodium"
     };
+
+    println!("cargo:warning=mode: {mode}");
+
     println!("cargo:rustc-link-lib={mode}={name}");
     println!("cargo:warning=Using unknown libsodium version.");
 }
@@ -409,8 +423,8 @@ fn retrieve_and_verify_archive(filename: &str, signature_filename: &str) -> Vec<
             .unwrap_or_else(|_| panic!("Failed to open archive [{:?}]", &archive_path))
             .read_to_end(&mut archive_bin)
             .unwrap();
-        let signature =
-            Signature::from_file(&signature_path).unwrap_or_else(|_| panic!("Failed to open signature file [{:?}]", &signature_path));
+        let signature = Signature::from_file(&signature_path)
+            .unwrap_or_else(|_| panic!("Failed to open signature file [{:?}]", &signature_path));
         pk.verify(&archive_bin, &signature, false)
             .expect("Invalid signature");
         return archive_bin;
